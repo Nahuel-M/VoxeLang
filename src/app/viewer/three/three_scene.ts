@@ -27,9 +27,9 @@ export class ThreeScene{
         const light2 = new THREE.DirectionalLight(0x909090, 0.5);
         light2.position.set(-100, 50, -200);
         this.scene.add(light2);
-        const ambient = new THREE.AmbientLight(0x808090, 1);
+        const ambient = new THREE.AmbientLight(0xaaaaaa, 1);
         this.scene.add(ambient);
-        const light = new THREE.HemisphereLight( 0xdddddd, 0x080808, 1 );
+        const light = new THREE.HemisphereLight( 0xffffff, 0x080808, 1.5 );
         this.scene.add( light );
     
         this.camera.position.z = 5;
@@ -55,7 +55,7 @@ export class ThreeScene{
 
   addCube(color: THREE.ColorRepresentation, position: THREE.Vector3): THREE.Mesh{
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshLambertMaterial({ color });
+    const material = new THREE.MeshPhongMaterial({ color, specular: 0x111111, shininess: 30 });
     const cube = new THREE.Mesh(geometry, material);
     cube.position.copy(position);
     this.scene.add(cube);
