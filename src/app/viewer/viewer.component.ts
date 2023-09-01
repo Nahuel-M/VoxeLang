@@ -12,12 +12,13 @@ export class ViewerComponent implements OnInit {
   cubes: Set<THREE.Mesh> = new Set(); 
   scene!: ThreeScene;
   beingDragged: boolean = false;
-  colors = [0xCCCCCC, 0xF2490D, 0x44F20D, 0x0DB6F2, 0xBB0DF2]
+  colors = [0xEEEEEE, 0xF2490D, 0x44F20D, 0x0DB6F2, 0xBB0DF2]
+  origin_color = 0x444444;
   selectedColorIndex = 0;
 
   ngOnInit() {
     this.scene = new ThreeScene();
-    this.makeCube(this.colors[this.selectedColorIndex], new THREE.Vector3(0, 0, 0));
+    this.makeCube(this.origin_color, new THREE.Vector3(0, 0, 0));
 
     window.onmousedown = () => {this.beingDragged = false};
     window.onmousemove = () => {this.beingDragged = true};
@@ -30,7 +31,9 @@ export class ViewerComponent implements OnInit {
 
   onKeyDown(event: KeyboardEvent){
     // if key is between 1 and 5, change selected color
-    if (event.key >= '1' && event.key <= '5'){
+    const number_key = parseInt(event.key);
+    console.log(number_key)
+    if (number_key >= 1 && number_key <= 5){
       this.selectedColorIndex = parseInt(event.key) - 1;
     }
     
@@ -60,8 +63,9 @@ export class ViewerComponent implements OnInit {
     const closest = intersects[0];
     console.log(closest);
     if (event.button == 0){ // Left click
-      this.makeCube(0x90FF90, closest.object.position.clone().add(closest.face!.normal));
+      this.makeCube(this.colors[this.selectedColorIndex], closest.object.position.clone().add(closest.face!.normal));
     } else if (event.button == 2) { // Right click
+      if (closest.object.position.equals(new THREE.Vector3(0, 0, 0))) return; // Protect origin block
       this.removeCube(closest.object as THREE.Mesh);
     }
   }

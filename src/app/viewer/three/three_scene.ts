@@ -21,15 +21,15 @@ export class ThreeScene{
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.renderer.domElement);
     
-        const light3 = new THREE.DirectionalLight(0xffffaa, 0.8);
+        const light3 = new THREE.DirectionalLight(0xdddddd, 0.8);
         light3.position.set(100, 0, 0);
         this.scene.add(light3);
-        const light2 = new THREE.DirectionalLight(0x9090a0, 0.5);
+        const light2 = new THREE.DirectionalLight(0x909090, 0.5);
         light2.position.set(-100, 50, -200);
         this.scene.add(light2);
         const ambient = new THREE.AmbientLight(0x808090, 1);
         this.scene.add(ambient);
-        const light = new THREE.HemisphereLight( 0xffff44, 0x080808, 1 );
+        const light = new THREE.HemisphereLight( 0xdddddd, 0x080808, 1 );
         this.scene.add( light );
     
         this.camera.position.z = 5;
