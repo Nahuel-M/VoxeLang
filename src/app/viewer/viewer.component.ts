@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { ThreeScene } from './three/three_scene';
 
 @Component({
   selector: 'app-viewer',
@@ -8,67 +9,43 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
   styleUrls: ['./viewer.component.scss'],
 })
 export class ViewerComponent implements OnInit {
-  cubes: THREE.Mesh[] = []; 
-  name = 'Angular';
-  camControls!: OrbitControls;
-  renderer!: THREE.WebGLRenderer;
-  scene!: THREE.Scene;
-  camera!: THREE.PerspectiveCamera;
+  cubes: Set<THREE.Mesh> = new Set(); 
+  scene!: ThreeScene;
   beingDragged: boolean = false;
-  rayCaster: THREE.Raycaster = new THREE.Raycaster();
+  colors = [0xCCCCCC, 0xF2490D, 0x44F20D, 0x0DB6F2, 0xBB0DF2]
+  selectedColorIndex = 0;
 
   ngOnInit() {
-    this.scene = new THREE.Scene();
-    this.scene.background = null;
-    this.camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    this.renderer = new THREE.WebGLRenderer({ alpha: true });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
-    this.makeCube(0x333333, new THREE.Vector3(0, 0, 0));
-
-    const light3 = new THREE.DirectionalLight(0xffffaa, 1.0);
-    light3.position.set(100, 0, 0);
-    this.scene.add(light3);
-    const light2 = new THREE.DirectionalLight(0x9090F0, 0.5);
-    light2.position.set(-100, 50, -200);
-    this.scene.add(light2);
-    const ambient = new THREE.AmbientLight(0x4040f0, 2);
-    this.scene.add(ambient);
-    const light = new THREE.HemisphereLight( 0xffff44, 0x080810, 1 );
-    this.scene.add( light );
-
-    this.camera.position.z = 5;
-    this.camControls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.camControls.enableDamping = true;
-    this.camControls.dampingFactor = 0.5;
-    this.render();
-
-    window.onresize = () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+    this.scene = new ThreeScene();
+    this.makeCube(this.colors[this.selectedColorIndex], new THREE.Vector3(0, 0, 0));
 
     window.onmousedown = () => {this.beingDragged = false};
     window.onmousemove = () => {this.beingDragged = true};
     window.onmouseup = (event) => {
       if (!this.beingDragged) this.mouseClick.call(this, event);
     };
+
+    window.onkeydown = this.onKeyDown.bind(this);
   }
 
+  onKeyDown(event: KeyboardEvent){
+    // if key is between 1 and 5, change selected color
+    if (event.key >= '1' && event.key <= '5'){
+      this.selectedColorIndex = parseInt(event.key) - 1;
+    }
+    
+
+    console.log(event);
+  }
 
   makeCube(color: THREE.ColorRepresentation, position: THREE.Vector3): void{
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshLambertMaterial({ color });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.copy(position);
-    this.scene.add(cube);
-    this.cubes.push(cube);
+    const cube = this.scene.addCube(color, position);
+    this.cubes.add(cube);
+  }
+
+  removeCube(cube: THREE.Mesh): void{
+    this.scene.removeCube(cube);
+    this.cubes.delete(cube);
   }
 
   mouseClick(event: MouseEvent){
@@ -76,21 +53,16 @@ export class ViewerComponent implements OnInit {
     const mouse = new THREE.Vector2();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    this.rayCaster.setFromCamera(mouse, this.camera);
-    const intersects = this.rayCaster.intersectObjects(this.scene.children);
+    const intersects = this.scene.rayTrace(mouse);
     if (intersects.length == 0) return;
 
     // Get the closest cube
     const closest = intersects[0];
     console.log(closest);
-    this.makeCube(0x90FF90, closest.object.position.clone().add(closest.face!.normal));
-
-  }
-
-  render(): void {
-    this.camControls.update();
-    this.renderer.clear();
-    this.renderer.render(this.scene, this.camera);
-    requestAnimationFrame(this.render.bind(this));
+    if (event.button == 0){ // Left click
+      this.makeCube(0x90FF90, closest.object.position.clone().add(closest.face!.normal));
+    } else if (event.button == 2) { // Right click
+      this.removeCube(closest.object as THREE.Mesh);
+    }
   }
 }
