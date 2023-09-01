@@ -72,7 +72,19 @@ export class ViewerComponent implements OnInit {
   }
 
   mouseClick(event: MouseEvent){
-    console.log(event)
+    // Cast ray from camera to mouse position
+    const mouse = new THREE.Vector2();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    this.rayCaster.setFromCamera(mouse, this.camera);
+    const intersects = this.rayCaster.intersectObjects(this.scene.children);
+    if (intersects.length == 0) return;
+
+    // Get the closest cube
+    const closest = intersects[0];
+    console.log(closest);
+    this.makeCube(0x90FF90, closest.object.position.clone().add(closest.face!.normal));
+
   }
 
   render(): void {
