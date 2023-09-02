@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
 export class ThreeScene{
     public scene: THREE.Scene;
@@ -54,9 +55,37 @@ export class ThreeScene{
   }
 
   addCube(color: THREE.ColorRepresentation, position: THREE.Vector3): THREE.Mesh{
+    const threeColor = new THREE.Color(color);
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color, specular: 0x111111, shininess: 30 });
-    const cube = new THREE.Mesh(geometry, material);
+    const cube_material = new THREE.MeshPhongMaterial({ color: threeColor.clone(), specular: 0x111111, shininess: 30 });
+    const cube = new THREE.Mesh(geometry, cube_material);
+    const line = new MeshLine();
+    line.setPoints([
+        // Front
+        0.5,0.5,0.5,
+        0.5,0.5,-0.5,
+        0.5,-0.5,-0.5,
+        0.5,-0.5,0.5,
+        // Left
+        0.5,0.5,0.5,
+        -0.5,0.5,0.5,
+        -0.5,0.5,-0.5,
+        0.5,0.5,-0.5,
+        // Top
+        0.5,0.5,0.5,
+        0.5,-0.5,0.5,
+        -0.5,-0.5,0.5,
+        -0.5,0.5,0.5,
+    ]);
+    const line_material = new MeshLineMaterial( { 
+        color: 0x000000, 
+        lineWidth:0.1, 
+        sizeAttenuation: 1,
+        resolution: new THREE.Vector2(0.01,0.01) } );
+    // line_material.color.addScalar(0.1);
+    // const line = new THREE.LineSegments(edges, line_material ); 
+    const line_mesh = new THREE.Mesh(line, line_material);
+    cube.add(line_mesh);
     cube.position.copy(position);
     this.scene.add(cube);
     return cube;
