@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { ThreeScene } from './three/three_scene';
 
 @Component({
@@ -20,13 +19,13 @@ export class ViewerComponent implements OnInit {
     this.scene = new ThreeScene();
     this.makeCube(this.origin_color, new THREE.Vector3(0, 0, 0));
 
+    window.onkeydown = this.onKeyDown.bind(this);
     window.onmousedown = () => {this.beingDragged = false};
     window.onmousemove = () => {this.beingDragged = true};
     window.onmouseup = (event) => {
       if (!this.beingDragged) this.mouseClick.call(this, event);
     };
 
-    window.onkeydown = this.onKeyDown.bind(this);
   }
 
   onKeyDown(event: KeyboardEvent){
