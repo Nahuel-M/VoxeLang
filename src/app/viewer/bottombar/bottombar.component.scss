@@ -1,0 +1,33 @@
+.bar {
+    bottom: 0;
+    margin: 0;
+    // background-color: gray;
+    height: 100px;
+    // width: 400px;
+}
+
+.background {
+    margin: 0;
+    overflow: hidden;
+    z-index: -1;
+    position: absolute;
+    background-color: gray;
+    opacity: 20%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.option{
+    width: 100px;
+    height: 100px;
+    display: inline-block
+}
+
+.color{
+    padding: 5px;
+    margin: 5px;
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+}

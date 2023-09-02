@@ -1,0 +1,12 @@
+app-sidebar {
+    margin: 5px;
+    position: absolute;
+    width: 20%;
+}
+
+app-bottombar {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}

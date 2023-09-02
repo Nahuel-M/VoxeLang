@@ -1,0 +1,10 @@
+<div class="bar">
+    <div class="option" 
+         *ngFor="let color of colors; let i = index" 
+         [style.background-color] = "i == selectedColorIndex ? '#606060' : null">
+        <div (click)="changeSelectedColor(i)" class="color" [style.background-color]="'#' + color.toString(16).padStart(6,'0')">
+            {{i + 1}}
+        </div>
+    </div>
+    <div class="background"></div>
+</div>
