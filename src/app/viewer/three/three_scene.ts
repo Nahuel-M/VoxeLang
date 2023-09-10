@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import { Line2 } from 'three/examples/jsm/lines/Line2';
+import { Color, Cube } from '../utils/cube';
 export class ThreeScene {
   public scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
@@ -56,37 +57,20 @@ export class ThreeScene {
   }
 
   addCube(
-    color: THREE.ColorRepresentation,
+    color: Color,
     position: THREE.Vector3
-  ): THREE.Mesh {
-    const threeColor = new THREE.Color(color);
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const wireframe = new THREE.EdgesGeometry(geometry);
-    const cube_material = new THREE.MeshPhongMaterial({
-      color: threeColor.clone(),
-      specular: 0x111111,
-      shininess: 30,
-    });
-    const cube = new THREE.Mesh(geometry, cube_material);
-    // const line = new LineGeometry().fromEdgesGeometry(wireframe);
-
-    // const line_material = new LineMaterial( {
-    //     linewidth: 0.01,
-    //     color: 0x000000} );
-    // // line_material.color.addScalar(0.1);
-    // const line_mesh = new THREE.Mesh(line, line_material);
-    // cube.add(line_mesh);
-
+  ): Cube {
+    const cube = new Cube(color);
     cube.position.copy(position);
     this.scene.add(cube);
     return cube;
   }
 
-  removeCube(cube: THREE.Mesh): void {
+  removeCube(cube: Cube): void {
     this.scene.remove(cube);
   }
 
-  highlightCube(cube: THREE.Mesh): void {
+  highlightCube(cube: Cube): void {
     const material: THREE.MeshPhongMaterial = Array.isArray(cube.material)
       ? cube.material[0] as THREE.MeshPhongMaterial
       : cube.material as THREE.MeshPhongMaterial; 

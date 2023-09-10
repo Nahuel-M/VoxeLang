@@ -7,6 +7,7 @@ import { ViewerComponent } from './viewer/viewer.component';
 import { SidebarComponent } from './viewer/sidebar/sidebar.component';
 import { BottombarComponent } from './viewer/bottombar/bottombar.component';
 
+
 @NgModule({
   declarations: [
     AppComponent,

@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import * as THREE from 'three';
 import { ThreeScene } from './three/three_scene';
+import { History, Action, Add, Remove } from './utils/history';
+import { Color, Cube } from './utils/cube';
+import { VectorMap } from './utils/vectormap';
+
+
 
 @Component({
   selector: 'app-viewer',
@@ -8,33 +13,53 @@ import { ThreeScene } from './three/three_scene';
   styleUrls: ['./viewer.component.scss'],
 })
 export class ViewerComponent implements OnInit {
-  cubes: Set<THREE.Mesh> = new Set();
+  cubes: VectorMap<Cube> = new VectorMap();
   scene!: ThreeScene;
   beingDragged: boolean = false;
-  colors: number[] = [0xffffff, 0xf2490d, 0x44f20d, 0x0db6f2, 0xbb0df2];
+  colors = [Color.white, Color.red, Color.green, Color.blue, Color.purple];
   origin_color = 0x444444;
   selectedColorIndex = 0;
-  hoveredCube: THREE.Mesh | null = null;
+  hoveredCube: Cube | null = null;
+  history: History = new History();
 
   ngOnInit() {
     this.scene = new ThreeScene();
     this.makeCube(this.origin_color, new THREE.Vector3(0, 0, 0));
 
     window.onkeydown = this.onKeyDown.bind(this);
+    window.onmousemove = this.onMouseMove.bind(this);
     window.onmousedown = () => {
       this.beingDragged = false;
     };
     window.onmouseup = (event) => {
       if (!this.beingDragged) this.mouseClick.call(this, event);
     };
-    window.onmousemove = this.onMouseMove.bind(this);
   }
 
   onKeyDown(event: KeyboardEvent) {
     // if key is between 1 and 5, change selected color
     const number_key = parseInt(event.key);
-    this.selectColorIndex(number_key - 1);
+    if (number_key >= 1 && number_key <= 5){
+      this.selectColorIndex(number_key - 1);
+    }
 
+    if (event.key == 'z' && event.ctrlKey) {
+      const action = this.history.undo();
+      if (action instanceof Add){
+        this.removeCube(action.position);
+      } else if (action instanceof Remove){
+        this.makeCube(action.color, action.position);
+      }
+    }
+
+    if (event.key == 'y' && event.ctrlKey) {
+      const action = this.history.redo();
+      if (action instanceof Add){
+        this.makeCube(action.color, action.position);
+      } else if (action instanceof Remove){
+        this.removeCube(action.position);
+      }
+    }
     console.log(event);
   }
 
@@ -47,10 +72,10 @@ export class ViewerComponent implements OnInit {
     const closest = intersects[0] ?? null;
     if (closest?.object == this.hoveredCube) return;
 
-    this.highlightCube(closest?.object as THREE.Mesh | null);
+    this.highlightCube(closest?.object as Cube | null);
   }
 
-  highlightCube(cube: THREE.Mesh | null): void {
+  highlightCube(cube: Cube | null): void {
     if (this.hoveredCube != null) {
       this.scene.unhighlightCube(this.hoveredCube);
     }
@@ -60,15 +85,20 @@ export class ViewerComponent implements OnInit {
     }
   }
 
-  makeCube(color: THREE.ColorRepresentation, position: THREE.Vector3): THREE.Mesh {
+  makeCube(
+    color: Color,
+    position: THREE.Vector3
+  ): Cube {
     const cube = this.scene.addCube(color, position);
-    this.cubes.add(cube);
+    this.cubes.set(position, cube);
+    console.log(this.cubes)
     return cube;
   }
 
-  removeCube(cube: THREE.Mesh): void {
-    this.scene.removeCube(cube);
-    this.cubes.delete(cube);
+  removeCube(position: THREE.Vector3): void {
+    console.log(position, this.cubes.get(position));
+    this.scene.removeCube(this.cubes.get(position)!);
+    this.cubes.delete(position);
   }
 
   mouseClick(event: MouseEvent) {
@@ -79,16 +109,22 @@ export class ViewerComponent implements OnInit {
 
     // Get the closest cube
     const closest = intersects[0];
+    const cube = closest.object as Cube;
 
-    if (event.button == 0) { // Left click
+    if (event.button == 0) {
+      // Left click
+      console.log(this.colors[this.selectedColorIndex])
       const cube = this.makeCube(
         this.colors[this.selectedColorIndex],
         closest.object.position.clone().add(closest.face!.normal)
       );
+      this.history.addAction(new Add(cube.position.clone(), cube.color));
       this.highlightCube(cube);
-    } else if (event.button == 2) { // Right click
-      if (closest.object.position == new THREE.Vector3(0, 0, 0)) return; // Protect origin block
-      this.removeCube(closest.object as THREE.Mesh);
+    } else if (event.button == 2) {
+      // Right click
+      if (closest.object.position.equals(new THREE.Vector3(0, 0, 0))) return; // Protect origin block
+      this.history.addAction(new Remove(cube.position.clone(), cube.color));
+      this.removeCube(cube.position);
       this.onMouseMove(event);
     }
   }
@@ -101,8 +137,9 @@ export class ViewerComponent implements OnInit {
 }
 
 function glMouse(event: MouseEvent): THREE.Vector2 {
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  const mouse = new THREE.Vector2(
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1
+  );
   return mouse;
 }
