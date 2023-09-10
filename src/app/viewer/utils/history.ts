@@ -18,13 +18,11 @@ export class History{
         if (this.maxPosition == this.minPosition){
             this.minPosition = (this.minPosition + 1) % this.buffer.length;
         }
-        console.log(action);
     }
 
     undo(): Action | null{
         if (this.currentPosition == this.minPosition) return null;
         this.currentPosition = (this.currentPosition - 1) % this.buffer.length;
-        console.log(this.buffer[this.currentPosition]);
         return this.buffer[this.currentPosition];
     }
 
@@ -32,7 +30,6 @@ export class History{
         if (this.currentPosition == this.maxPosition) return null;
         const action = this.buffer[this.currentPosition];
         this.currentPosition = (this.currentPosition + 1) % this.buffer.length;
-        console.log(action);
         return action;
     }
 }

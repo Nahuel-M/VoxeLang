@@ -1,4 +1,4 @@
-import { BoxGeometry, Material, Mesh, MeshPhongMaterial } from "three";
+import { BoxGeometry, Material, Mesh, MeshPhongMaterial, Texture } from "three";
 
 export enum Color{
     white = 0xffffff,
@@ -10,12 +10,14 @@ export enum Color{
 }
 export class Cube extends Mesh{
     color: Color;
-    constructor(color: Color){
+    constructor(color: Color, texture?: Texture){
         const material = new MeshPhongMaterial({
+            bumpMap: texture,
             color,
             specular: 0x111111,
             shininess: 30,
         });
+        material.needsUpdate = true;
         const geometry = new BoxGeometry(1, 1, 1);
         super(geometry, material);
         this.color = color;

@@ -10,10 +10,6 @@ export class BottombarComponent {
   @Input() colors: number[] = [];
   @Output() changeSelectedColorIndex = new EventEmitter<number>();
 
-  constructor() {
-    console.log(this.colors)
-  }
-
   changeSelectedColor(index: number){
     this.changeSelectedColorIndex.emit(index);
   }
