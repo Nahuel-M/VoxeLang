@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as THREE from 'three';
 import { ThreeScene } from './three/three_scene';
-import { History, Action, Add, Remove } from './utils/history';
+import { History, Add, Remove } from './utils/history';
 import { Color, Cube } from './utils/cube';
 import { VectorMap } from './utils/vectormap';
 
@@ -39,28 +39,30 @@ export class ViewerComponent implements OnInit {
   onKeyDown(event: KeyboardEvent) {
     // if key is between 1 and 5, change selected color
     const number_key = parseInt(event.key);
-    if (number_key >= 1 && number_key <= 5){
+    if (number_key >= 1 && number_key <= 5) {
       this.selectColorIndex(number_key - 1);
     }
 
-    if (event.key == 'z' && event.ctrlKey) {
+    const ctrlOrMetaKey = event.ctrlKey || event.metaKey;
+    const yOrShiftZKey = event.key === 'y' || event.key === 'Z' || (event.key === 'z' && event.shiftKey);
+
+    if (event.key === 'z' && ctrlOrMetaKey && !event.shiftKey) {
       const action = this.history.undo();
-      if (action instanceof Add){
+      if (action instanceof Add) {
         this.removeCube(action.position);
-      } else if (action instanceof Remove){
+      } else if (action instanceof Remove) {
         this.makeCube(action.color, action.position);
       }
     }
 
-    if (event.key == 'y' && event.ctrlKey) {
+    if (yOrShiftZKey && ctrlOrMetaKey) {
       const action = this.history.redo();
-      if (action instanceof Add){
+      if (action instanceof Add) {
         this.makeCube(action.color, action.position);
-      } else if (action instanceof Remove){
+      } else if (action instanceof Remove) {
         this.removeCube(action.position);
       }
     }
-    console.log(event);
   }
 
   onMouseMove(event: MouseEvent) {
@@ -91,12 +93,10 @@ export class ViewerComponent implements OnInit {
   ): Cube {
     const cube = this.scene.addCube(color, position);
     this.cubes.set(position, cube);
-    console.log(this.cubes)
     return cube;
   }
 
   removeCube(position: THREE.Vector3): void {
-    console.log(position, this.cubes.get(position));
     this.scene.removeCube(this.cubes.get(position)!);
     this.cubes.delete(position);
   }
@@ -113,7 +113,6 @@ export class ViewerComponent implements OnInit {
 
     if (event.button == 0) {
       // Left click
-      console.log(this.colors[this.selectedColorIndex])
       const cube = this.makeCube(
         this.colors[this.selectedColorIndex],
         closest.object.position.clone().add(closest.face!.normal)

@@ -13,11 +13,11 @@ import { BottombarComponent } from './viewer/bottombar/bottombar.component';
     AppComponent,
     ViewerComponent,
     SidebarComponent,
-    BottombarComponent
+    BottombarComponent,
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
