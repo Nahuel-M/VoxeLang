@@ -79,11 +79,22 @@ export class ThreeScene {
     requestAnimationFrame(this.render.bind(this));
   }
 
+  addCubes(cubes: Cube[]): void {
+    cubes.forEach((cube) => this.scene.add(cube));
+  }
+
   addCube(color: Color, position: THREE.Vector3): Cube {
     const cube = new Cube(color, this.texture);
     cube.position.copy(position);
     this.scene.add(cube);
     return cube;
+  }
+
+  removeAllCubes(): void {
+    this.scene.children
+      .filter((child) => child instanceof Cube)
+      .slice(1) // Protect origin block
+      .forEach((cube) => this.scene.remove(cube));
   }
 
   removeCube(cube: Cube): void {

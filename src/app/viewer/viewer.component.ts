@@ -4,6 +4,8 @@ import { ThreeScene } from './three/three_scene';
 import { History, Add, Remove } from './utils/history';
 import { Color, Cube } from './utils/cube';
 import { VectorMap } from './utils/vectormap';
+import { readTextFromClipboard, writeTextToClipboard } from './utils/clipboard';
+import { cubesToText, textToCubeData } from './utils/text_parser';
 
 
 
@@ -63,6 +65,35 @@ export class ViewerComponent implements OnInit {
         this.removeCube(action.position);
       }
     }
+
+    if (event.key === 'c' && ctrlOrMetaKey) {
+      this.onToClipboard();
+    }
+
+    if (event.key === 'v' && ctrlOrMetaKey) {
+      this.onFromClipboard();
+    }
+  }
+
+  /**
+   * Writes the current program to the clipboard.
+   */
+  onToClipboard(): void {
+    const text: string = cubesToText(this.cubes);
+    writeTextToClipboard(text);
+  }
+
+  /**
+   * Loads a program from the clipboard.
+   * 
+   * This will clear the current program.
+   */
+  async onFromClipboard(): Promise<void> {
+    const text: string = await readTextFromClipboard();
+    const cubes: Cube[] = textToCubeData(text)
+      .map(({ color, position }) => this.makeCube(color, position));
+    this.scene.removeAllCubes();
+    this.scene.addCubes(cubes);
   }
 
   onMouseMove(event: MouseEvent) {
