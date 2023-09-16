@@ -18,7 +18,7 @@ export class ThreeScene {
       0.1,
       1000
     );
-    this.renderer = new THREE.WebGLRenderer({ alpha: true });
+    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
 

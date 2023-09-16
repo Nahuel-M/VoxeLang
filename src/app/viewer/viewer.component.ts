@@ -6,6 +6,7 @@ import { Color, Cube } from './utils/cube';
 import { VectorMap } from './utils/vectormap';
 import { readTextFromClipboard, writeTextToClipboard } from './utils/clipboard';
 import { cubesToText, textToCubeData } from './utils/text_parser';
+import { RunTime } from './runtime/runtime';
 
 
 
@@ -16,10 +17,11 @@ import { cubesToText, textToCubeData } from './utils/text_parser';
 })
 export class ViewerComponent implements OnInit {
   cubes: VectorMap<Cube> = new VectorMap();
+  runtime: RunTime = new RunTime();
   scene!: ThreeScene;
   beingDragged: boolean = false;
   colors = [Color.white, Color.red, Color.green, Color.blue, Color.purple];
-  origin_color = 0x444444;
+  origin_color = Color.black;
   selectedColorIndex = 0;
   hoveredCube: Cube | null = null;
   history: History = new History();
@@ -73,6 +75,16 @@ export class ViewerComponent implements OnInit {
     if (event.key === 'v' && ctrlOrMetaKey) {
       this.onFromClipboard();
     }
+
+    if (event.key === 'f') {
+      const flows = this.runtime.debug_step();
+      for (const cube of this.cubes.values()) {
+        this.scene.unhighlightCube(cube);
+      }
+      for (const flow of flows) {
+        this.scene.highlightCube(this.cubes.get(flow.position)!);
+      }
+    }
   }
 
   /**
@@ -124,12 +136,16 @@ export class ViewerComponent implements OnInit {
   ): Cube {
     const cube = this.scene.addCube(color, position);
     this.cubes.set(position, cube);
+    const runtimeCubes = this.cubes.values().map((cube) => { return {position: cube.position, color: cube.color}});
+    this.runtime.initState(runtimeCubes);
     return cube;
   }
 
   removeCube(position: THREE.Vector3): void {
     this.scene.removeCube(this.cubes.get(position)!);
     this.cubes.delete(position);
+    const runtimeCubes = this.cubes.values().map((cube) => { return {position: cube.position, color: cube.color}});
+    this.runtime.initState(runtimeCubes);
   }
 
   mouseClick(event: MouseEvent) {

@@ -37,4 +37,34 @@ export class VectorMap<T> {
       delete this.data[vector.x][vector.y];
     }
   }
+
+  clear() {
+    this.data = {};
+  }
+
+  values() : T[]{
+    const data = this.data;
+    return Object.keys(data).map((x) => {
+      return Object.keys(data[Number(x)]).map((y) => {
+        return Object.keys(data[Number(x)][Number(y)]).map((z) => {
+          return data[Number(x)][Number(y)][Number(z)];
+        });
+      });
+    }).flat(2);
+  }
+
+  iterator(): IterableIterator<T> {
+    const data = this.data;
+    return {
+      [Symbol.iterator]: function* () {
+        for (const x of Object.keys(data).map(Number)) {
+          for (const y of Object.keys(data[x]).map(Number)) {
+            for (const z of Object.keys(data[x][y]).map(Number)) {
+              yield data[x][y][z];
+            }
+          }
+        }
+      }
+    } as IterableIterator<T>;
+  }
 }
