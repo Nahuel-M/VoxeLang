@@ -19,7 +19,7 @@ export class ViewerComponent implements OnInit {
   cubes: VectorMap<Cube> = new VectorMap();
   runtime: RunTime = new RunTime();
   scene!: ThreeScene;
-  beingDragged: boolean = false;
+  down_position: {x: number,y: number} | null = null;
   colors = [Color.white, Color.red, Color.green, Color.blue, Color.purple];
   origin_color = Color.black;
   selectedColorIndex = 0;
@@ -32,11 +32,15 @@ export class ViewerComponent implements OnInit {
 
     window.onkeydown = this.onKeyDown.bind(this);
     window.onmousemove = this.onMouseMove.bind(this);
-    window.onmousedown = () => {
-      this.beingDragged = false;
+    window.onmousedown = (event) => {
+      this.down_position = {x: event.clientX, y: event.clientY};
     };
     window.onmouseup = (event) => {
-      if (!this.beingDragged) this.mouseClick.call(this, event);
+      if (this.down_position != null &&
+          Math.abs(this.down_position.x - event.clientX) < 5 &&
+          Math.abs(this.down_position.y - event.clientY) < 5){
+            this.mouseClick.call(this, event);
+          }
     };
   }
 
@@ -109,7 +113,6 @@ export class ViewerComponent implements OnInit {
   }
 
   onMouseMove(event: MouseEvent) {
-    this.beingDragged = true;
     const mouse = glMouse(event);
     const intersects = this.scene.rayTrace(mouse);
 
