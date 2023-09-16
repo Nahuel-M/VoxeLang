@@ -158,16 +158,16 @@ export class ViewerComponent implements OnInit {
     const closest = intersects[0];
     const cube = closest.object as Cube;
 
-    if (event.button == 0) {
-      // Left click
+    if (event.button == 2) {
+      // Right click
       const cube = this.makeCube(
         this.colors[this.selectedColorIndex],
         closest.object.position.clone().add(closest.face!.normal)
       );
       this.history.addAction(new Add(cube.position.clone(), cube.color));
       this.highlightCube(cube);
-    } else if (event.button == 2) {
-      // Right click
+    } else if (event.button == 0) {
+      // Left click
       if (closest.object.position.equals(new THREE.Vector3(0, 0, 0))) return; // Protect origin block
       this.history.addAction(new Remove(cube.position.clone(), cube.color));
       this.removeCube(cube.position);
