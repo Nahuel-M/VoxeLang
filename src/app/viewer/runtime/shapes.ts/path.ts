@@ -7,6 +7,17 @@ import { Shape } from '../shape';
 export class Path implements Shape {
   constructor(private cubes: Cube[]) {}
 
+  static tryApplyShape(cube: Cube): boolean {
+    const white_cubes = cube.recursiveNeighbors(
+      (cube) => cube.color == Color.white
+    );
+    if (white_cubes.length == 0) return false;
+
+    const path = new Path(white_cubes);
+    white_cubes.forEach((cube) => (cube.shape = path));
+    return true;
+  }
+
   propagation(flows: Flow[]): Flow[] {
     const outputFlows = [];
     for (const flow of flows){
@@ -22,17 +33,6 @@ export class Path implements Shape {
         }
     }
     return outputFlows;
-  }
-
-  static tryApplyShape(cube: Cube): boolean {
-    const white_cubes = cube.recursiveNeighbors(
-      (cube) => cube.color == Color.white
-    );
-    if (white_cubes.length == 0) return false;
-
-    const path = new Path(white_cubes);
-    white_cubes.forEach((cube) => (cube.shape = path));
-    return true;
   }
 }
 
